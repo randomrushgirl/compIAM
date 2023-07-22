@@ -71,7 +71,7 @@ class Melodia:
         self.voiceVibrato = voiceVibrato
         self.voicingTolerance = voicingTolerance
 
-    def extract(self, input_data, input_sr=44100, out_step=None):
+    def extract(self, input_data, input_sr=44100, out_step=None, want_confidence = False):
         """Extract the melody from a given file.
 
         :param input_data: path to audio file or numpy array like audio signal
@@ -118,14 +118,17 @@ class Melodia:
             voiceVibrato=self.voiceVibrato,
             voicingTolerance=self.voicingTolerance,
         )
-        pitch, _ = extractor(audio)
+        pitch, confidence = extractor(audio)
         TStamps = np.array(range(0, len(pitch))) * float(self.hopSize) / self.sampleRate
         output = np.array([TStamps, pitch]).transpose()
 
         if out_step is not None:
             new_len = int((len(audio) / self.sampleRate) // out_step)
             return resampling(output, new_len)
-
+            
+        if want_confidence == True:
+            return output, confidence
+            
         return output
 
     @staticmethod
